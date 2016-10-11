@@ -1,0 +1,29 @@
+// ServerInjector.idl : ServerInjector.exe 的类型库源
+
+// 此文件将由 MIDL 编译器处理以产生
+// 类型库(ServerInjector.tlb)。
+
+[ uuid(3606D138-7363-4AAD-A169-DC476ADDE6C7), version(1.0) ]
+library ServerInjector
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	//  CServerInjectorDoc 的主调度接口
+	
+	[ uuid(037FE15E-C13A-4D45-AF7E-13BF1A20B43A) ]
+	dispinterface IServerInjector
+	{
+		properties:
+			
+		methods:
+	};
+
+	//  CServerInjectorDoc 的类信息
+	
+	[ uuid(83493616-0F02-4DA9-A429-1D3F1EF9FD08) ]
+	coclass ServerInjector
+	{
+		[default] dispinterface IServerInjector;
+	};
+};

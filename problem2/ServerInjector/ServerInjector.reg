@@ -1,0 +1,17 @@
+REGEDIT
+; 此 .REG 文件可能由 SETUP 程序使用。
+;   如果 SETUP 程序不可用，则调用
+;   CWinApp::RegisterShellFileTypes 和 COleObjectFactory::UpdateRegistryAll
+;   在 InitInstance 中对下列项自动进行注册。
+
+
+HKEY_CLASSES_ROOT\ServerInjector.Application = ServerInjector Application
+
+
+HKEY_CLASSES_ROOT\ServerInjector.Application\CLSID = {83493616-0F02-4DA9-A429-1D3F1EF9FD08}
+
+HKEY_CLASSES_ROOT\CLSID\{83493616-0F02-4DA9-A429-1D3F1EF9FD08} = ServerInjector Application
+HKEY_CLASSES_ROOT\CLSID\{83493616-0F02-4DA9-A429-1D3F1EF9FD08}\ProgId = ServerInjector.Application
+
+
+HKEY_CLASSES_ROOT\CLSID\{83493616-0F02-4DA9-A429-1D3F1EF9FD08}\LocalServer32 = ServerInjector.EXE
