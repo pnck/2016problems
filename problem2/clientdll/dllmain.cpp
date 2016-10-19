@@ -213,7 +213,7 @@ LRESULT NewWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 							//-------------------------------------------------------------------
 							// Close the message.
 
-							if (hMsg)CryptMsgClose(hMsg);
+							CryptMsgClose(hMsg);
 							WCHAR szEncryptStr[1024];
 							DWORD cch = 1024;
 							CryptBinaryToString(pbEncodedBlob, cbEncodedBlob, CRYPT_STRING_BASE64, szEncryptStr, &cch);
@@ -244,4 +244,3 @@ LRESULT NewWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	}
 	return CallWindowProc(pfnOldWndProc, hwnd, msg, wparam, lparam);
 }
-//flag{s1mpleLogic_with_unfami1iarTech}

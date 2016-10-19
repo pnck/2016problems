@@ -1,0 +1,9 @@
+[
+	uuid("145208ED-5605-483E-B929-4BAA3DFFBC39"),
+	version(1.0)
+]
+interface IRpcCheck
+{
+	int CheckFlag([in, string]const wchar_t *pflgstr);
+	void Shutdown();
+};
