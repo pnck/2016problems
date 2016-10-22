@@ -50,15 +50,15 @@ typedef struct PIXELSGROUP8
 	RGBTRIPLE group[8];
 }*PPIXELSGROUP;
 
-typedef struct SLIDE
+typedef struct SLICE
 {
-	SLIDE() {}
-	SLIDE(LONG rs,LONG re,LONG cs,LONG ce):rowStart(rs),rowEnd(re),colStart(cs),colEnd(ce){}
+	SLICE() {}
+	SLICE(LONG rs,LONG re,LONG cs,LONG ce):rowStart(rs),rowEnd(re),colStart(cs),colEnd(ce){}
 	LONG rowStart;
 	LONG rowEnd;
 	LONG colStart;
 	LONG colEnd;
-}*PSLIDE;
+}*PSLICE;
 typedef struct RAWBITMAPINFO
 {
 	LONG height;
@@ -67,10 +67,10 @@ typedef struct RAWBITMAPINFO
 }*PRAWBITMAPINFO;
 
 void Transform_Xor(PRGBTRIPLE pPixels, LONGLONG imgSize);
-void Transform_Split(PRAWBITMAPINFO pRaw, int slideRowCount, int slideColCount, std::vector<SLIDE> &slides,int maxdeep = 20,int mode = 1);
+void Transform_Split(PRAWBITMAPINFO pRaw, int sliceRowCount, int sliceColCount, std::vector<SLICE> &slices,int maxdeep = 20,int mode = 1);
 void Transform_Split(PRAWBITMAPINFO pRaw);
-void ExchangeSlide(PRAWBITMAPINFO pRaw, PRGBTRIPLE buff, SLIDE &slide1, SLIDE &slide2);
-inline LONG SlideHeight(PSLIDE s);
-inline LONG SlideWidth(PSLIDE s);
-inline LONG SlideHeight(SLIDE &s);
-inline LONG SlideWidth(SLIDE &s);
+void ExchangeSlice(PRAWBITMAPINFO pRaw, PRGBTRIPLE buff, SLICE &slice1, SLICE &slice2);
+inline LONG SliceHeight(PSLICE s);
+inline LONG SliceWidth(PSLICE s);
+inline LONG SliceHeight(SLICE &s);
+inline LONG SliceWidth(SLICE &s);

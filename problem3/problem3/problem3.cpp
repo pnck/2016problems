@@ -70,13 +70,13 @@ PROBLEM3_API int __stdcall Process(LPCWSTR pszFile)
 			raw.height = pInfoHeader->biHeight;
 			raw.width = pInfoHeader->biWidth;
 			raw.rawPixels = pPixels;
-			std::vector<SLIDE> slides;
-			SLIDE s(0, raw.height - 1, 0, raw.width - 1);
-			slides.push_back(s);
-			Transform_Split(&raw, 5, 6, slides);
+			std::vector<SLICE> slices;
+			SLICE s(0, raw.height - 1, 0, raw.width - 1);
+			slices.push_back(s);
+			Transform_Split(&raw, 5, 6, slices);
 			Transform_Xor(pPixels, pInfoHeader->biSizeImage);
-			slides.push_back(s);
-			Transform_Split(&raw,2,3, slides,1);
+			slices.push_back(s);
+			Transform_Split(&raw,2,3, slices,1);
 
 		}
 	}
@@ -166,142 +166,142 @@ void Transform_Xor(PRGBTRIPLE pPixels, LONGLONG imgSize)
 
 void Transform_Split(PRAWBITMAPINFO pRaw)
 {
-	std::vector<SLIDE> slides;
-	SLIDE s(0, pRaw->height - 1, 0, pRaw->width - 1);
-	slides.push_back(s);
-	Transform_Split(pRaw, 5, 6, slides);
+	std::vector<SLICE> slices;
+	SLICE s(0, pRaw->height - 1, 0, pRaw->width - 1);
+	slices.push_back(s);
+	Transform_Split(pRaw, 5, 6, slices);
 }
 
-void Transform_Split(PRAWBITMAPINFO pRaw, int slideRowCount, int slideColCount, std::vector<SLIDE> &slides, int maxdeep, int mode)
+void Transform_Split(PRAWBITMAPINFO pRaw, int sliceRowCount, int sliceColCount, std::vector<SLICE> &slices, int maxdeep, int mode)
 {
-	LONG height = SlideHeight(slides.back());
-	LONG width = SlideWidth(slides.back());
-	if (slideRowCount >= height && height <= 3)slideRowCount = height;
-	if (slideColCount >= width && width <= 3)slideColCount = width;
-	LONG slideCount = slideRowCount*slideColCount;
-	LONG nextHeight = height / slideRowCount;
-	LONG nextWidth = width / slideColCount;
+	LONG height = SliceHeight(slices.back());
+	LONG width = SliceWidth(slices.back());
+	if (sliceRowCount >= height && height <= 3)sliceRowCount = height;
+	if (sliceColCount >= width && width <= 3)sliceColCount = width;
+	LONG sliceCount = sliceRowCount*sliceColCount;
+	LONG nextHeight = height / sliceRowCount;
+	LONG nextWidth = width / sliceColCount;
 
-	SLIDE slideCurrent = slides.back();//save current slides
-	slides.pop_back();//pop it from slides list
+	SLICE sliceCurrent = slices.back();//save current slices
+	slices.pop_back();//pop it from slices list
 
 
-	if (slideCount < 2 || maxdeep <= 0 || (height <= 1 && width <= 1))
+	if (sliceCount < 2 || maxdeep <= 0 || (height <= 1 && width <= 1))
 		return;
 
-	for (int i(0), k(0);i < slideRowCount;i++)//split slides for next turn
+	for (int i(0), k(0);i < sliceRowCount;i++)//split slices for next turn
 	{
-		for (int j(0);j < slideColCount;j++, k++)
+		for (int j(0);j < sliceColCount;j++, k++)
 		{
-			SLIDE tslide;
-			tslide.rowStart = slideCurrent.rowStart + i*nextHeight;
-			tslide.colStart = slideCurrent.colStart + j*nextWidth;
-			if (i < slideRowCount - 1)
-				tslide.rowEnd = slideCurrent.rowStart + (i + 1)*nextHeight - 1;
+			SLICE tslice;
+			tslice.rowStart = sliceCurrent.rowStart + i*nextHeight;
+			tslice.colStart = sliceCurrent.colStart + j*nextWidth;
+			if (i < sliceRowCount - 1)
+				tslice.rowEnd = sliceCurrent.rowStart + (i + 1)*nextHeight - 1;
 			else
-				tslide.rowEnd = slideCurrent.rowEnd;
-			if (j < slideColCount - 1)
-				tslide.colEnd = slideCurrent.colStart + (j + 1)*nextWidth - 1;
+				tslice.rowEnd = sliceCurrent.rowEnd;
+			if (j < sliceColCount - 1)
+				tslice.colEnd = sliceCurrent.colStart + (j + 1)*nextWidth - 1;
 			else
-				tslide.colEnd = slideCurrent.colEnd;
-			slides.push_back(tslide);
+				tslice.colEnd = sliceCurrent.colEnd;
+			slices.push_back(tslice);
 		}
 	}
 
-	auto ritSlides = slides.rbegin();//reverse iterator to access the last (slidecount)slides
+	auto ritSlices = slices.rbegin();//reverse iterator to access the last (slicecount)slices
 
-	//LONGLONG buffSize = SlideWidth(&(slides[slideCount - 1]))*SlideHeight(&(slides[slideCount - 1]));
+	//LONGLONG buffSize = SliceWidth(&(slices[sliceCount - 1]))*SliceHeight(&(slices[sliceCount - 1]));
 	//PRGBTRIPLE buff = new RGBTRIPLE[buffSize];
-	for (int i(slideCount / 2 - 1);i >= 0;--i)
+	for (int i(sliceCount / 2 - 1);i >= 0;--i)
 	{
 		if (mode == 1)
-			ExchangeSlide(pRaw, nullptr/*buff*/, ritSlides[i], ritSlides[slideCount - i - 1]);
+			ExchangeSlice(pRaw, nullptr/*buff*/, ritSlices[i], ritSlices[sliceCount - i - 1]);
 	}
 	//delete[] buff;
-	for (int i(0);i < slideCount && !slides.empty();i++)//process every slide
+	for (int i(0);i < sliceCount && !slices.empty();i++)//process every slice
 	{
-		int nextSlideRowCount = slideRowCount - 1;
-		int nextSlideColCount = slideColCount - 1;
-		if (nextSlideRowCount <= 1) nextSlideRowCount = 5;
-		if (nextSlideColCount <= 1) nextSlideColCount = 5;
-		LONG h = SlideHeight(slides.back());
-		LONG w = SlideWidth(slides.back());
+		int nextSliceRowCount = sliceRowCount - 1;
+		int nextSliceColCount = sliceColCount - 1;
+		if (nextSliceRowCount <= 1) nextSliceRowCount = 5;
+		if (nextSliceColCount <= 1) nextSliceColCount = 5;
+		LONG h = SliceHeight(slices.back());
+		LONG w = SliceWidth(slices.back());
 
 		if (h <= 15)
 		{
-			if (h == 15) nextSlideRowCount = 5;
-			else if (h >= 12) nextSlideRowCount = 4;
-			else if (h >= 9) nextSlideRowCount = 3;
-			else if (h >= 6) nextSlideRowCount = 2;
-			else nextSlideRowCount = 1;
+			if (h == 15) nextSliceRowCount = 5;
+			else if (h >= 12) nextSliceRowCount = 4;
+			else if (h >= 9) nextSliceRowCount = 3;
+			else if (h >= 6) nextSliceRowCount = 2;
+			else nextSliceRowCount = 1;
 			if (w >= 20) w = 5;
 		}
 		if (w <= 15)
 		{
-			if (w == 15) nextSlideColCount = 5;
-			else if (w == 12) nextSlideColCount = 4;
-			else if (w > 9) nextSlideColCount = 3;
-			else if (w > 6) nextSlideColCount = 2;
-			else nextSlideColCount = 1;
+			if (w == 15) nextSliceColCount = 5;
+			else if (w == 12) nextSliceColCount = 4;
+			else if (w > 9) nextSliceColCount = 3;
+			else if (w > 6) nextSliceColCount = 2;
+			else nextSliceColCount = 1;
 			if (h >= 20)h = 5;
 		}
-		//if (slides.size() == 9) DebugBreak();
-		Transform_Split(pRaw, nextSlideRowCount, nextSlideColCount, slides, maxdeep - 1, ~mode);
+		//if (slices.size() == 9) DebugBreak();
+		Transform_Split(pRaw, nextSliceRowCount, nextSliceColCount, slices, maxdeep - 1, ~mode);
 
 	}
 }
 
-void ExchangeSlide(PRAWBITMAPINFO pRaw, PRGBTRIPLE buff, SLIDE &slide1, SLIDE &slide2)
+void ExchangeSlice(PRAWBITMAPINFO pRaw, PRGBTRIPLE buff, SLICE &slice1, SLICE &slice2)
 {
-	if (!SlideHeight(slide1) || !SlideHeight(slide2) || !SlideWidth(slide1) || !SlideWidth(slide2))
+	if (!SliceHeight(slice1) || !SliceHeight(slice2) || !SliceWidth(slice1) || !SliceWidth(slice2))
 	{
 		return;
 	}
 	bool isInternalBuff = false;
 	if (!buff)
 	{
-		buff = new RGBTRIPLE[MIN(SlideHeight(slide1), SlideHeight(slide2))*MIN(SlideWidth(slide1), SlideWidth(slide2))];
+		buff = new RGBTRIPLE[MIN(SliceHeight(slice1), SliceHeight(slice2))*MIN(SliceWidth(slice1), SliceWidth(slice2))];
 		isInternalBuff = true;
 	}
 
-	LONG h = MIN(SlideHeight(slide1), SlideHeight(slide2));
-	LONG wsize = MIN(SlideWidth(slide1), SlideWidth(slide2))*sizeof(RGBTRIPLE);
+	LONG h = MIN(SliceHeight(slice1), SliceHeight(slice2));
+	LONG wsize = MIN(SliceWidth(slice1), SliceWidth(slice2))*sizeof(RGBTRIPLE);
 
 	for (LONG i(0);i < h;i++)//copy by rows
 	{
 		LONG rowSize = pRaw->width * 3;
 		if (rowSize % 4) rowSize += 4 - (rowSize % 4);
 
-		PBYTE p = reinterpret_cast<PBYTE>(pRaw->rawPixels) + (slide1.rowStart + i)*rowSize;
-		PRGBTRIPLE pSlide1Base = reinterpret_cast<PRGBTRIPLE>(p) + slide1.colStart;
+		PBYTE p = reinterpret_cast<PBYTE>(pRaw->rawPixels) + (slice1.rowStart + i)*rowSize;
+		PRGBTRIPLE pSlice1Base = reinterpret_cast<PRGBTRIPLE>(p) + slice1.colStart;
 
-		p = reinterpret_cast<PBYTE>(pRaw->rawPixels) + (slide2.rowStart + i)*rowSize;
-		PRGBTRIPLE pSlide2Base = reinterpret_cast<PRGBTRIPLE>(p) + slide2.colStart;
+		p = reinterpret_cast<PBYTE>(pRaw->rawPixels) + (slice2.rowStart + i)*rowSize;
+		PRGBTRIPLE pSlice2Base = reinterpret_cast<PRGBTRIPLE>(p) + slice2.colStart;
 
 
-		memcpy_s(buff, h*wsize, pSlide2Base, wsize);
-		memcpy_s(pSlide2Base, wsize, pSlide1Base, wsize);
-		memcpy_s(pSlide1Base, wsize, buff, wsize);
+		memcpy_s(buff, h*wsize, pSlice2Base, wsize);
+		memcpy_s(pSlice2Base, wsize, pSlice1Base, wsize);
+		memcpy_s(pSlice1Base, wsize, buff, wsize);
 	}
 	if (isInternalBuff) delete buff;
 }
 
-LONG SlideHeight(PSLIDE s)
+LONG SliceHeight(PSLICE s)
 {
 	return s->rowEnd - s->rowStart + 1;
 }
 
-LONG SlideHeight(SLIDE &s)
+LONG SliceHeight(SLICE &s)
 {
 	return s.rowEnd - s.rowStart + 1;
 }
 
-LONG SlideWidth(PSLIDE s)
+LONG SliceWidth(PSLICE s)
 {
 	return s->colEnd - s->colStart + 1;
 }
 
-LONG SlideWidth(SLIDE &s)
+LONG SliceWidth(SLICE &s)
 {
 	return s.colEnd - s.colStart + 1;
 }
