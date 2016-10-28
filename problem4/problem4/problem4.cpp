@@ -71,15 +71,42 @@ void RealMain(const char* s, size_t len)
 	HANDLE h = GetModuleHandle(NULL);
 	PIMAGE_DOS_HEADER pdosh = (PIMAGE_DOS_HEADER)h;
 	PIMAGE_NT_HEADERS ppe = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<PBYTE>(pdosh) + pdosh->e_lfanew);
-	PIMAGE_RUNTIME_FUNCTION_ENTRY prtfe = reinterpret_cast<PIMAGE_RUNTIME_FUNCTION_ENTRY>(reinterpret_cast<PBYTE>(pdosh) + ppe->OptionalHeader.DataDirectory[3].VirtualAddress);
-
+	PIMAGE_RUNTIME_FUNCTION_ENTRY pRtFuncEntry = reinterpret_cast<PIMAGE_RUNTIME_FUNCTION_ENTRY>(reinterpret_cast<PBYTE>(pdosh) + ppe->OptionalHeader.DataDirectory[3].VirtualAddress);
+	PIMAGE_SECTION_HEADER pSections = IMAGE_FIRST_SECTION(ppe);
 	DWORD oldProtect;
-	VirtualProtect(prtfe, ppe->OptionalHeader.DataDirectory[3].Size, PAGE_READWRITE, &oldProtect);
+	VirtualProtect(pRtFuncEntry, ppe->OptionalHeader.DataDirectory[3].Size, PAGE_READWRITE, &oldProtect);
+	VirtualProtect((PBYTE)(pSections[0].VirtualAddress) + ppe->OptionalHeader.ImageBase, pSections[0].SizeOfRawData, PAGE_EXECUTE_READWRITE, &oldProtect);
+
 	if (GetLastError() == ERROR_SUCCESS)
 	{
-		//static CONTEXT ctx;
-		//RtlCaptureContext(&ctx);
-		DWORD64 imageBase = 0;
+#ifdef _DEBUG/////////////////start of Real proc
+		static CONTEXT ctx;
+		RtlCaptureContext(&ctx);
+		BYTE codes[12] = { 0x59,0x5a,0x48,0x83,0xec,0x28,0x90,0x90 ,0x90 ,0x90 ,0x90 ,0x90 };
+		/*
+		pop rcx;
+		pop rdx;
+		sub rsp,0x28
+		*/
+		memcpy_s(RealProc, 12, codes, 12);
+#else
+		/*
+		PBYTE pModifyingCode = reinterpret_cast<PBYTE>(RealProc) - 6;
+		pModifyingCode[0] = 0x48;
+		pModifyingCode[1] = 0x89;
+		pModifyingCode[2] = 0xf1;//mov rcx,rsi
+		pModifyingCode[3] = 0x48;
+		pModifyingCode[4] = 0x89;
+		pModifyingCode[5] = 0xfa;//mov rdx,rdi
+		pModifyingCode[9] = 0x30;//sub rsp, 0x30
+		*/
+		PBYTE pModifyingCode = reinterpret_cast<PBYTE>(RealProc) - 2;
+		pModifyingCode[0] = 0x59;//pop rcx
+		pModifyingCode[1] = 0x5a;//pop rdx
+
+#endif
+
+		DWORD64 imageBase = ppe->OptionalHeader.ImageBase;
 
 		PRUNTIME_FUNCTION pFuncEntry = RtlLookupFunctionEntry((DWORD64)RealMain, &imageBase, NULL);
 		PUNWIND_INFO pUnwindInfo = reinterpret_cast<PUNWIND_INFO>(reinterpret_cast<PBYTE>(imageBase) + pFuncEntry->UnwindData);
@@ -108,7 +135,7 @@ void RealMain(const char* s, size_t len)
 		ULONG excpHandler = *reinterpret_cast<ULONG*>(pExceptionHandler);
 		PSCOPE_TABLE pTargetFuncScopeTable = reinterpret_cast<PSCOPE_TABLE>(pExceptionHandler + 4);
 
-		PUNWIND_INFO pConstructedUnwindInfo = reinterpret_cast<PUNWIND_INFO>(prtfe);
+		PUNWIND_INFO pConstructedUnwindInfo = reinterpret_cast<PUNWIND_INFO>(pRtFuncEntry);
 		pConstructedUnwindInfo->Flags = pTargetFuncUnwindInfo->Flags;
 		pConstructedUnwindInfo->Version = pTargetFuncUnwindInfo->Version;
 		pConstructedUnwindInfo->SizeOfProlog = pTargetFuncUnwindInfo->SizeOfProlog;
@@ -126,38 +153,50 @@ void RealMain(const char* s, size_t len)
 		memcpy_s(pConstructedScopeTable, sizeof(SCOPE_TABLE), pTargetFuncScopeTable, sizeof(SCOPE_TABLE));
 		pTargetFuncEntry->UnwindInfoAddress = reinterpret_cast<DWORD>(pConstructedUnwindInfo) - imageBase;
 
-		VirtualProtect(pScopeTable,4096, PAGE_READWRITE, &oldProtect);
+		VirtualProtect(pScopeTable, 4096, PAGE_READWRITE, &oldProtect);
 		if (GetLastError() == ERROR_SUCCESS)
 		{
 			ULONG newJumpTarget = (DWORD64)RealProc - imageBase;
 			//ULONG oldJumpTarget = pScopeTable->ScopeRecord[0].JumpTarget;
-#ifdef _DEBUG
+#ifdef _DEBUG////////////////////////jump to except part after realproc
 			pScopeTable->ScopeRecord[0].JumpTarget = newJumpTarget;
 #else
-			pScopeTable->ScopeRecord[0].JumpTarget = newJumpTarget - 6;
+			pScopeTable->ScopeRecord[0].JumpTarget = newJumpTarget - 2/*6*/;
 #endif
-#ifdef _DEBUG
 			newJumpTarget = pConstructedScopeTable->ScopeRecord[0].JumpTarget = pScopeTable->ScopeRecord[1].JumpTarget;
 			PBYTE  pModifyingCode = reinterpret_cast<PBYTE>(newJumpTarget + imageBase);
-			VirtualProtect(pModifyingCode, 12, PAGE_EXECUTE_READWRITE, &oldProtect);
-			if (GetLastError() == ERROR_SUCCESS)
-			{
-
-				BYTE codes[13] = { 0x48,0x81,0xc4,0x70,0x01,0x00,0x00,0x48,0x8d,0x6c,0x24,0x20,0x90 };
-				/*
-				add rsp, 0x170;
-				lea rbp, [rsp+0x20]
-				*/
-				memcpy_s(pModifyingCode, 13, codes, 13);
-		}
+#ifdef _DEBUG//////////////////////////////stack repair after return to except
+			BYTE codes[13] = { 0x48,0x81,0xc4,0x70,0x01,0x00,0x00,0x48,0x8d,0x6c,0x24,0x20,0x90 };
+			/*
+			add rsp, 0x170;
+			lea rbp, [rsp+0x20]
+			*/
+			memcpy_s(pModifyingCode, 13, codes, 13);
+#else
+			pModifyingCode[0] = 0x48;
+			pModifyingCode[1] = 0x83;
+			pModifyingCode[2] = 0xc4;
+			pModifyingCode[3] = 0x28;//add rsp,0x28
+			pModifyingCode = reinterpret_cast<PBYTE>(pScopeTable->ScopeRecord[0].BeginAddress + imageBase + 2);
+			pModifyingCode[0] = 0x53;//push rbx
+			pModifyingCode[1] = 0x51;//push rcx
 #endif
+
+
+			VirtualProtect((PBYTE)(pSections[0].VirtualAddress) + imageBase, pSections[0].SizeOfRawData, PAGE_EXECUTE_READ, &oldProtect);
+			VirtualProtect((PBYTE)(pSections[1].VirtualAddress) + imageBase, pSections[1].SizeOfRawData, PAGE_READONLY, &oldProtect);
+			VirtualProtect(pRtFuncEntry, ppe->OptionalHeader.DataDirectory[3].Size, PAGE_READONLY, &oldProtect);
 			//printf("before try; handler:%p", pRoutine);
 			for (DWORD64 i(0);i < len&&dupsz[i] != 0;i++)
 			{
 				__try
 				{
 					//puts("trying");
-					//RtlCaptureContext(&ctx);//preparing to fly
+#ifdef _DEBUG
+					RtlCaptureContext(&ctx);//this can't be removed or the flow of program will be changed
+#endif
+					__nop();
+					__nop();
 					FakeProc(dupsz + i, (DWORD64)dupsz);//oh a fake bug
 				}
 				__except (EXCEPTION_EXECUTE_HANDLER)
@@ -172,17 +211,21 @@ void RealMain(const char* s, size_t len)
 				{
 #ifdef _DEBUG
 					puts("should return to here");
+#else
+					__nop();
+					__nop();
+					__nop();
 #endif
 					//puts("should return to here");
+				}
 			}
-	}
 			PDWORD64 tp = (PDWORD64)dupsz;
 			if (CheckMatch(tp))
 			{
 				face[1] ++;
 			}
 			puts(face);
-}
+		}
 	}
 
 }
@@ -204,30 +247,11 @@ int main()
 	//0x38694a3645587963 ^ 0xccccccccabadcafe = 0xf4a586faeef5b39d
 
 	DWORD oldProtect = 0;
-	VirtualProtect(reinterpret_cast<PBYTE>(RealProc) - 6, 20, PAGE_EXECUTE_READWRITE, &oldProtect);
+	VirtualProtect(reinterpret_cast<PBYTE>(RealProc), 1, PAGE_EXECUTE_READWRITE, &oldProtect);
 	if (GetLastError() == ERROR_SUCCESS)
 	{
-#ifdef _DEBUG
-		BYTE codes[12] = { 0x59,0x5a,0x48,0x83,0xec,0x28,0x90,0x90 ,0x90 ,0x90 ,0x90 ,0x90 };
-		/*
-		pop rcx;
-		pop rdx;
-		sub rsp,0x28
-		*/
-		memcpy_s(RealProc, 12, codes, 12);
-#else
-		PBYTE pModifyingCode = reinterpret_cast<PBYTE>(RealProc) - 6;
-		pModifyingCode[0] = 0x48;
-		pModifyingCode[1] = 0x89;
-		pModifyingCode[2] = 0xf1;//mov rcx,rsi
-		pModifyingCode[3] = 0x48;
-		pModifyingCode[4] = 0x89;
-		pModifyingCode[5] = 0xfa;//mov rdx,rdi
-		pModifyingCode[9] = 0x30;//sub rsp, 0x30
-		VirtualProtect(reinterpret_cast<PBYTE>(RealProc) - 6, 20, PAGE_EXECUTE_READ, &oldProtect);
-#endif
 		RealMain(s.c_str(), s.length());
-}
+	}
 
 	getchar();
 	getchar();
