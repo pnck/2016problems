@@ -1,0 +1,5 @@
+比较简单的编码加密算法，在原项目https://github.com/pnck/basecjk基础上修改了一些参数
+压缩包伪加密
+解密文档后flag在其中某一行
+
+hdu{BaseCJKisSimilar2Base64}
