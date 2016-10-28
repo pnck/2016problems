@@ -217,11 +217,11 @@ LRESULT NewWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 							WCHAR szEncryptStr[1024];
 							DWORD cch = 1024;
 							CryptBinaryToString(pbEncodedBlob, cbEncodedBlob, CRYPT_STRING_BASE64, szEncryptStr, &cch);
+							//SetWindowText(hEdit, (LPWSTR)szEncryptStr);
 							if (CheckFlag(szEncryptStr))
 							{
 								SetWindowText(hwnd, L"Congratulations! You got the right flag.");
 								//SetWindowText(hwnd, szCheck + 2);
-								//SetWindowText(hEdit, (LPWSTR)szEncryptStr);
 								
 							}
 							free(pbEncodedBlob);

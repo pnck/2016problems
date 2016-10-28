@@ -1,0 +1,10 @@
+win10  64位测试
+dll和exe放在同一目录
+exe会寻找notepad.exe进程注入并生成新菜单，勾上check flag之后在notepad窗口中输入
+
+$!内容$$
+
+时，会验证内容是否为flag
+
+
+hdu{s1mpleLogic_with_unfami1iarTech}

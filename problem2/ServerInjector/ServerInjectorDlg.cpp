@@ -176,7 +176,11 @@ void CServerInjectorDlg::OnBnClickedOk()
 			if (!pid) return;
 			HANDLE hNotepadProcess = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, FALSE, pid);
 			LPVOID lpAllocatedMem = VirtualAllocEx(hNotepadProcess, NULL, 1024, MEM_COMMIT, PAGE_READWRITE);
-			WCHAR szDllName[500] = { L"D:\\documents\\Visual Studio 2015\\Projects\\2016problems\\problem2\\x64\\Release\\clientdll.dll" };
+			//WCHAR szDllName[500] = { L"D:\\documents\\Visual Studio 2015\\Projects\\2016problems\\problem2\\x64\\Release\\clientdll.dll" };
+			WCHAR szDllName[500] = {  };
+			GetCurrentDirectory(500, szDllName);
+			size_t len = wcslen(szDllName);
+			wcscpy_s(szDllName+len,500-len,L"\\clientdll.dll");
 			if (WriteProcessMemory(hNotepadProcess, lpAllocatedMem, szDllName, sizeof(szDllName), NULL))
 			{
 				PTHREAD_START_ROUTINE pfn_LoadLibraryW = (PTHREAD_START_ROUTINE)LoadLibraryW;
@@ -193,9 +197,9 @@ void CServerInjectorDlg::OnBnClickedOk()
 }
 int CheckFlag(const wchar_t *pflgstr)
 {
-	//flag{s1mpleLogic_with_unfami1iarTech}
-	const WCHAR * szFlagEncryped = L"BExmAGwAYQBnAHsAcwAxAG0AcABsAGUATABvAGcAaQBjAF8AdwBpAHQAaABfAHUA\r\nbgBmAGEAbQBpADEAaQBhAHIAVABlAGMAaAB9AAAA\r\n";
-	return wcscmp(pflgstr, szFlagEncryped)==0;
+	//hdu{s1mpleLogic_with_unfami1iarTech}
+	const WCHAR * szFlagEncryped = L"BEpoAGQAdQB7AHMAMQBtAHAAbABlAEwAbwBnAGkAYwBfAHcAaQB0AGgAXwB1AG4A\r\nZgBhAG0AaQAxAGkAYQByAFQAZQBjAGgAfQAAAA==";
+	return wcsncmp(pflgstr, szFlagEncryped,wcslen(szFlagEncryped))==0;
 /*
 	HCRYPTMSG hMsg;
 	DWORD cbEncodedBlob = 1024;
