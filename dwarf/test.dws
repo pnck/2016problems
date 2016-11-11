@@ -1,0 +1,190 @@
+section_type: ".eh_frame"
+section_addr: 0x400a18
+eh_hdr_addr: 0x4009e4
+except_table_addr: 0x400b34
+eh_hdr_table_enc: DW_EH_PE_sdata4, DW_EH_PE_datarel
+begin CIE
+index: 0
+version: 1
+data_align: -8
+code_align: 1
+return_addr_rule: 16
+fde_ptr_enc: DW_EH_PE_sdata4, DW_EH_PE_pcrel
+begin INSTRUCTIONS
+DW_CFA_def_cfa r7 8 
+DW_CFA_offset r16 1
+DW_CFA_undefined r0
+end INSTRUCTIONS
+end CIE
+begin CIE
+index: 1
+version: 1
+data_align: -8
+code_align: 1
+return_addr_rule: 16
+fde_ptr_enc: DW_EH_PE_sdata4, DW_EH_PE_pcrel
+begin INSTRUCTIONS
+DW_CFA_def_cfa r7 8 
+DW_CFA_offset r16 1
+end INSTRUCTIONS
+end CIE
+begin CIE
+index: 2
+version: 1
+data_align: -8
+code_align: 1
+return_addr_rule: 16
+fde_ptr_enc: DW_EH_PE_sdata4, DW_EH_PE_pcrel
+fde_lsda_ptr_enc: DW_EH_PE_udata4
+personality_ptr_enc: DW_EH_PE_udata4
+personality: 0x4007b0
+begin INSTRUCTIONS
+DW_CFA_def_cfa r7 8 
+DW_CFA_offset r16 1
+end INSTRUCTIONS
+end CIE
+#function guess: ?
+begin FDE
+index: 0
+cie_index: 1
+initial_location: 0x400720
+address_range: 0xb0
+begin INSTRUCTIONS
+DW_CFA_def_cfa_offset 16
+DW_CFA_advance_loc 6
+DW_CFA_def_cfa_offset 24
+DW_CFA_advance_loc 10
+DW_CFA_def_cfa_expression begin EXPRESSION
+		DW_OP_breg7 8
+		DW_OP_breg16 0
+		DW_OP_lit15
+		DW_OP_and
+		DW_OP_lit11
+		DW_OP_ge
+		DW_OP_lit3
+		DW_OP_shl
+		DW_OP_plus
+end EXPRESSION
+end INSTRUCTIONS
+end FDE
+#function guess: _start
+begin FDE
+index: 1
+cie_index: 0
+initial_location: 0x4007d0
+address_range: 0x2a
+begin INSTRUCTIONS
+end INSTRUCTIONS
+end FDE
+#function guess: main
+begin FDE
+index: 2
+cie_index: 2
+initial_location: 0x4008c6
+address_range: 0x7f
+lsda_idx: 0x0
+begin INSTRUCTIONS
+DW_CFA_advance_loc 1
+DW_CFA_def_cfa_offset 16
+DW_CFA_offset r6 2
+DW_CFA_advance_loc 3
+DW_CFA_def_cfa_register r6
+DW_CFA_advance_loc 5
+DW_CFA_offset r3 3
+DW_CFA_advance_loc1 117
+DW_CFA_def_cfa r7 8 
+end INSTRUCTIONS
+end FDE
+#function guess: __libc_csu_init
+begin FDE
+index: 3
+cie_index: 1
+initial_location: 0x400950
+address_range: 0x65
+begin INSTRUCTIONS
+DW_CFA_advance_loc 2
+DW_CFA_def_cfa_offset 16
+DW_CFA_offset r15 2
+DW_CFA_advance_loc 2
+DW_CFA_def_cfa_offset 24
+DW_CFA_offset r14 3
+DW_CFA_advance_loc 5
+DW_CFA_def_cfa_offset 32
+DW_CFA_offset r13 4
+DW_CFA_advance_loc 2
+DW_CFA_def_cfa_offset 40
+DW_CFA_offset r12 5
+DW_CFA_advance_loc 8
+DW_CFA_def_cfa_offset 48
+DW_CFA_offset r6 6
+DW_CFA_advance_loc 8
+DW_CFA_def_cfa_offset 56
+DW_CFA_offset r3 7
+DW_CFA_advance_loc 15
+DW_CFA_def_cfa_offset 64
+DW_CFA_advance_loc 48
+DW_CFA_def_cfa_offset 56
+DW_CFA_advance_loc 1
+DW_CFA_def_cfa_offset 48
+DW_CFA_advance_loc 1
+DW_CFA_def_cfa_offset 40
+DW_CFA_advance_loc 2
+DW_CFA_def_cfa_offset 32
+DW_CFA_advance_loc 2
+DW_CFA_def_cfa_offset 24
+DW_CFA_advance_loc 2
+DW_CFA_def_cfa_offset 16
+DW_CFA_advance_loc 2
+DW_CFA_def_cfa_offset 8
+end INSTRUCTIONS
+end FDE
+#function guess: __libc_csu_fini
+begin FDE
+index: 4
+cie_index: 1
+initial_location: 0x4009c0
+address_range: 0x2
+begin INSTRUCTIONS
+end INSTRUCTIONS
+end FDE
+#LSDA 0
+begin LSDA
+lpstart: 0x0
+typeinfo_enc: DW_EH_PE_udata4
+#call site 0
+begin CALL_SITE
+position: 0x15
+length: 0x28
+landing_pad: 0x3d
+has_action: true
+first_action: 0
+end CALL_SITE
+#call site 1
+begin CALL_SITE
+position: 0x54
+length: 0x5
+landing_pad: 0x65
+has_action: false
+end CALL_SITE
+#call site 2
+begin CALL_SITE
+position: 0x59
+length: 0x5
+landing_pad: 0x0
+has_action: false
+end CALL_SITE
+#call site 3
+begin CALL_SITE
+position: 0x73
+length: 0x5
+landing_pad: 0x0
+has_action: false
+end CALL_SITE
+#action 0
+begin ACTION
+type_idx: 0
+next: none
+end ACTION
+#type entry 0
+typeinfo: 0x0
+end LSDA
