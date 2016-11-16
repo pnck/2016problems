@@ -262,6 +262,10 @@ int main()
 	std::string s;
 	std::cin >> s;
 
+    if (strncmp(s.c_str(), "WDFLAG", 6))
+        return 1;
+    s = std::string("hdu")+s.substr(6);
+    //WDFLAG{YouMakeChoicesRight}
 	//hdu{YouMakeChoicesRight}
 	//FAKE(-1):MfmTgIm4KeA}MICoAHtC1M0E
 	//0x346d4967546d664d ^ 0xdeadbeefaaaabbbb = 0xeac0f788fec7ddf6

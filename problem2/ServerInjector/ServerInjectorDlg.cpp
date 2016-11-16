@@ -197,9 +197,9 @@ void CServerInjectorDlg::OnBnClickedOk()
 }
 int CheckFlag(const wchar_t *pflgstr)
 {
-	//hdu{s1mpleLogic_with_unfami1iarTech}
+	//WDFLAG{s1mpleLogic_with_unfami1iarTech}
     //AfxMessageBox(pflgstr);
-    const WCHAR * szFlagEncryped = L"BFCBHJzKpabTgdUyzq58xpswe2XNyCL9IY0uY5711l9H1OK3ImQaTGbm5WEmiKiw\r\ngJSpUwKBRTCYFTy3l8wXoAVCtB3Jjhl+MDytGcw6i6DRlA==\r\n";
+    const WCHAR * szFlagEncryped = L"BFCEvoMVFtVb+mvYB08bavo+wVXCdsFuAgR0kscus5u+/0nQ3I0fVUkxzUdu/Drj\r\n9k987HxNNrDPyoCVtux77+KrDAZC4bu1i92crNHMqcTmWA==\r\n";
 	return wcsncmp(pflgstr, szFlagEncryped,wcslen(szFlagEncryped))==0;
     /*
 	HCRYPTMSG hMsg;

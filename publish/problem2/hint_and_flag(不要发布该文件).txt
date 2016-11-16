@@ -23,4 +23,4 @@ dll第一次被注入进记事本时，会寻找当前主窗口添加菜单并�
 
 解题需要调试出rpc调用的逻辑，找到exe中的base64字串和dll中的aes key，并用该key通过AES解密方可获得flag。这里用到的aes函数来源于开源项目，应该比较容易找到的
  
-hdu{s1mpleLogic_with_unfami1iarTech}
+WDFLAG{s1mpleLogic_with_unfami1iarTech}
