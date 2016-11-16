@@ -6,12 +6,13 @@
 将源码文件CMakeLists的add_definitions(-D_WITH_DECODE)前注释去掉重新用cmake生成
 命令 【basecjk e 文件名】加密文件并输出至屏幕
 命令 【basecjk d 字符串】解密字符串
+发布的文件只保留了编码加密功能（e命令）
 
 
 提示&原理摘要：
 
 比较简单的encode算法，在原项目https://github.com/pnck/basecjk基础上修改了一些参数
-附带的压缩包是伪加密的，如果选手反馈较多请及时给出该提示。
-解密文档后flag在其中某一行
+原伪加密zip弃用，想了下，没什么必要
+可以比较下用e命令处理原始文档后得出的文件是否与秘密文档相同
 
-hdu{BaseCJKisSimilar2Base64}
+WDFLAG{BaseCJKisSimilar2Base64}
