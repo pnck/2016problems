@@ -7,7 +7,9 @@
 
 const char *repltable = "PJ4MhwxQ8vE}CiX0tRIoc-AekSj6l1gY7LNOprT{nKaBFGyDHsbW93+qVUZ5fd2zmu";
 __declspec(noinline) void  RealProc(char *pc, DWORD64 index/*actually dupsz*/);
+__declspec(noinline) void  CheckMirror(PBYTE pMirror);
 
+static PBYTE pMirror = nullptr;
 
 int findpos(char c)
 {
@@ -23,6 +25,7 @@ int findpos(char c)
 __declspec(noinline) void FakeProc(char *pc, DWORD64 index)
 {
 	DWORD64 dw[3] = { 0xdeadbeefaaaabbbb,0x1956201619940627,0xcccccccacedecade };
+    CheckMirror(pMirror);
 	char *p = (char *)dw;
 	*pc = repltable[index - 1];
 	*pc ^= p[index];
@@ -64,6 +67,25 @@ __declspec(noinline) bool CheckMatch(PDWORD64 p)
 	}
 	return false;
 }
+__declspec(noinline) void CheckMirror(PBYTE pMirror)
+{
+    HANDLE h = GetModuleHandle(NULL);
+    PIMAGE_DOS_HEADER pdosh = (PIMAGE_DOS_HEADER)h;
+    PIMAGE_NT_HEADERS ppe = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<PBYTE>(pdosh) + pdosh->e_lfanew);
+    PIMAGE_RUNTIME_FUNCTION_ENTRY pRtFuncEntry = reinterpret_cast<PIMAGE_RUNTIME_FUNCTION_ENTRY>(reinterpret_cast<PBYTE>(pdosh) + ppe->OptionalHeader.DataDirectory[3].VirtualAddress);
+    PIMAGE_SECTION_HEADER pSections = IMAGE_FIRST_SECTION(ppe);
+    PBYTE pMyCode = reinterpret_cast<PBYTE>(pSections[0].VirtualAddress + ppe->OptionalHeader.ImageBase);
+    for (int i(0);i < pSections[0].SizeOfRawData;i++)
+    {
+        int *p = nullptr;
+        if (pMirror[i] != pMyCode[i])
+        {
+            DWORD oldProtect;
+            VirtualProtect((PBYTE)(pSections[0].VirtualAddress) + ppe->OptionalHeader.ImageBase, pSections[0].SizeOfRawData, PAGE_EXECUTE_READWRITE, &oldProtect);//crack
+            memset((PBYTE)(pSections[0].VirtualAddress) + ppe->OptionalHeader.ImageBase, 0xcc, pSections[0].SizeOfRawData);//boom
+        }
+    }
+}
 void RealMain(const char* s, size_t len)
 {
 	char face[3] = { ":(" };
@@ -101,8 +123,8 @@ void RealMain(const char* s, size_t len)
 		pModifyingCode[9] = 0x30;//sub rsp, 0x30
 		*/
 		PBYTE pModifyingCode = reinterpret_cast<PBYTE>(RealProc) - 2;
-		pModifyingCode[0] = 0x59;//pop rcx
-		pModifyingCode[1] = 0x5a;//pop rdx
+		pModifyingCode[0] = 0x5a;//pop rdx   
+		pModifyingCode[1] = 0x59;//pop rcx
 
 #endif
 
@@ -177,9 +199,9 @@ void RealMain(const char* s, size_t len)
 			pModifyingCode[1] = 0x83;
 			pModifyingCode[2] = 0xc4;
 			pModifyingCode[3] = 0x28;//add rsp,0x28
-			pModifyingCode = reinterpret_cast<PBYTE>(pScopeTable->ScopeRecord[0].BeginAddress + imageBase + 2);
-			pModifyingCode[0] = 0x53;//push rbx
-			pModifyingCode[1] = 0x51;//push rcx
+			pModifyingCode = reinterpret_cast<PBYTE>(pScopeTable->ScopeRecord[0].BeginAddress + imageBase + 0);
+			pModifyingCode[0] = 0x56;//push rcx 0x53;//push rbx
+			pModifyingCode[1] = 0x56;//push rcx
 #endif
 
 
@@ -187,15 +209,19 @@ void RealMain(const char* s, size_t len)
 			VirtualProtect((PBYTE)(pSections[1].VirtualAddress) + imageBase, pSections[1].SizeOfRawData, PAGE_READONLY, &oldProtect);
 			VirtualProtect(pRtFuncEntry, ppe->OptionalHeader.DataDirectory[3].Size, PAGE_READONLY, &oldProtect);
 			//printf("before try; handler:%p", pRoutine);
-			for (DWORD64 i(0);i < len&&dupsz[i] != 0;i++)
+            PBYTE pOriginCode = (PBYTE)calloc(1,pSections[0].SizeOfRawData+1024);
+            memcpy_s(pOriginCode, pSections[0].SizeOfRawData + 1024, (PBYTE)pSections[0].VirtualAddress + ppe->OptionalHeader.ImageBase, pSections[0].SizeOfRawData);
+            pMirror = pOriginCode;
+            for (DWORD64 i(0);i < len&&dupsz[i] != 0;i++)
 			{
+                CheckMirror(pMirror);
 				__try
 				{
 					//puts("trying");
 #ifdef _DEBUG
 					RtlCaptureContext(&ctx);//this can't be removed or the flow of program will be changed
 #endif
-					__nop();
+					//__nop();
 					__nop();
 					FakeProc(dupsz + i, (DWORD64)dupsz);//oh a fake bug
 				}
@@ -219,6 +245,7 @@ void RealMain(const char* s, size_t len)
 					//puts("should return to here");
 				}
 			}
+            free(pOriginCode);
 			PDWORD64 tp = (PDWORD64)dupsz;
 			if (CheckMatch(tp))
 			{

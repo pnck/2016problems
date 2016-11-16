@@ -1,5 +1,17 @@
-�Ƚϼ򵥵ı�������㷨����ԭ��Ŀhttps://github.com/pnck/basecjk�������޸���һЩ����
-ѹ����α����
-�����ĵ���flag������ĳһ��
+﻿可执行文件格式：64bit ELF(linux可执行文件格式)
+编译环境：gcc 4.9 64bit
+估计分值： 200（以简单异或比较crackme为10分计）
+
+测试流程：
+将源码文件CMakeLists的add_definitions(-D_WITH_DECODE)前注释去掉重新用cmake生成
+命令 【basecjk e 文件名】加密文件并输出至屏幕
+命令 【basecjk d 字符串】解密字符串
+
+
+提示&原理摘要：
+
+比较简单的encode算法，在原项目https://github.com/pnck/basecjk基础上修改了一些参数
+附带的压缩包是伪加密的，如果选手反馈较多请及时给出该提示。
+解密文档后flag在其中某一行
 
 hdu{BaseCJKisSimilar2Base64}

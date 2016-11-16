@@ -27,6 +27,9 @@
     <ClInclude Include="..\rpcdef.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="aes.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -39,6 +42,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="rpcdef_c.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="aes.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

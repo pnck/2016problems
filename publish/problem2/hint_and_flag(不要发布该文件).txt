@@ -1,10 +1,26 @@
-win10  64λ����
-dll��exe����ͬһĿ¼
-exe��Ѱ��notepad.exe����ע�벢�����²˵�������check flag֮����notepad����������
+﻿可执行文件格式：64bit mfc exe   64bit dll
+编译环境：VS2015 64bit
+估计分值： 250（以简单异或比较crackme为10分计）
 
-$!����$$
+测试流程：
+win10 64bit 测试
 
-ʱ������֤�����Ƿ�Ϊflag
+1.  dll改名为clientdll.dll，和exe放在同一目录
+2.  运行记事本
+3.  运行exe，然后点击确定，exe会寻找notepad.exe进程注入并生成新菜单
+4.  在notepad新生成的菜单里勾上check flag之后在notepad窗口中输入
+    $!内容$$
+    时，会验证内容是否为flag，正确flag在文档末尾。
 
+提示&原理摘要：
 
+dll是rpc客户端，exe是rpc服务端，exe必须保持运行，dll才能远程调用exe中的验证flag函数
+主要逻辑都在dll中
+dll第一次被注入进记事本时，会寻找当前主窗口添加菜单并替换窗口的消息循环处理函数，插入额外逻辑
+当收到记事本中的edit被修改消息时检测edit中的内容是否为$!开头，如果是，接着寻找结尾标志$$
+然后将此段内容用aes加密（with fixed key)并转成base64字串
+通过rpc调用将字串传给exe中的checkflag函数与写好的字串比较，如相等，dll将记事本窗口标题修改为congratulations字样，比对失败则无提示
+
+解题需要调试出rpc调用的逻辑，找到exe中的base64字串和dll中的aes key，并用该key通过AES解密方可获得flag。这里用到的aes函数来源于开源项目，应该比较容易找到的
+ 
 hdu{s1mpleLogic_with_unfami1iarTech}

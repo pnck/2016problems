@@ -198,19 +198,25 @@ void CServerInjectorDlg::OnBnClickedOk()
 int CheckFlag(const wchar_t *pflgstr)
 {
 	//hdu{s1mpleLogic_with_unfami1iarTech}
-	const WCHAR * szFlagEncryped = L"BEpoAGQAdQB7AHMAMQBtAHAAbABlAEwAbwBnAGkAYwBfAHcAaQB0AGgAXwB1AG4A\r\nZgBhAG0AaQAxAGkAYQByAFQAZQBjAGgAfQAAAA==";
+    //AfxMessageBox(pflgstr);
+    const WCHAR * szFlagEncryped = L"BFCBHJzKpabTgdUyzq58xpswe2XNyCL9IY0uY5711l9H1OK3ImQaTGbm5WEmiKiw\r\ngJSpUwKBRTCYFTy3l8wXoAVCtB3Jjhl+MDytGcw6i6DRlA==\r\n";
 	return wcsncmp(pflgstr, szFlagEncryped,wcslen(szFlagEncryped))==0;
-/*
+    /*
 	HCRYPTMSG hMsg;
 	DWORD cbEncodedBlob = 1024;
 	BYTE *pbEncodedBlob = (BYTE *)malloc(1024);
-	CryptStringToBinary(pflgstr, wcslen(pflgstr)*sizeof(wchar_t), CRYPT_STRING_BASE64, (BYTE*)pbEncodedBlob, &cbEncodedBlob, NULL, NULL);
+    ZeroMemory(pbEncodedBlob, 1024);
+    DWORD cbEncodedBlob2 = 1024;
+    BYTE *pbEncodedBlob2 = (BYTE *)malloc(1024);
+    ZeroMemory(pbEncodedBlob2, 1024);
+	CryptStringToBinary(szFlagEncryped, 0, CRYPT_STRING_BASE64, (BYTE*)pbEncodedBlob, &cbEncodedBlob, NULL, NULL);
+    CryptStringToBinary(pflgstr,0, CRYPT_STRING_BASE64, (BYTE*)pbEncodedBlob2, &cbEncodedBlob2, NULL, NULL);
 
 	DWORD cbDecoded;
 	BYTE *pbDecoded;
 
 	hMsg = CryptMsgOpenToDecode(
-		PKCS_7_ASN_ENCODING,      // encoding type.
+		PKCS_7_ASN_ENCODING | X509_ASN_ENCODING,      // encoding type.
 		0,                     // flags.
 		CMSG_DATA,             // look for a data message.
 		NULL,                  // cryptographic provider.
@@ -257,9 +263,11 @@ int CheckFlag(const wchar_t *pflgstr)
 	// Clean up.
 	AfxMessageBox((LPWSTR)pbDecoded);
 	free(pbEncodedBlob);
+    free(pbEncodedBlob2);
 	free(pbDecoded);
 	CryptMsgClose(hMsg);
-*/
+    return 1;
+    */
 }
 
 
